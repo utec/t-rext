@@ -1,0 +1,4 @@
+apiBaseUrl = http://localhost:8080/v1/book
+bookTitle = Flores para ALgernon ${srand}
+bookAuthor = Daniel Keyes ${srand}
+bookIsbn = ISBN-${irand}

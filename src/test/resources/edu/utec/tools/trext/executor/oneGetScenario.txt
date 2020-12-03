@@ -1,0 +1,10 @@
+Feature:   Google Searching           
+As a web surfer, I want to search Google, so that I can learn new things.
+
+Scenario: Fetch user
+url http://localhost:8080/user
+method get
+asserts
+assertThat ${status} isEqualTo 200
+assertThat $.personId isNotNull
+assertThat $.personId isEqualTo 77777

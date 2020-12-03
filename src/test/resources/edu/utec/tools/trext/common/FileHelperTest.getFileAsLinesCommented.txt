@@ -1,0 +1,11 @@
+Feature:   Core educativo apis
+Ensuse a healty rest apis to be used in core educativo
+
+Scenario: Login user
+url http://localhost:5000/login?user=jon&password=doe
+method get
+asserts
+assertThat ${status} isEqualTo 200
+# assertThat $.token isNotNull
+context
+#setVar "token" $.token

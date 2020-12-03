@@ -1,0 +1,9 @@
+Scenario: Fetch user
+url https://some-api.com/api/user
+header apiKey = 123456789
+header h1 = v1
+method get
+asserts
+assertThat 200 isEqualTo status
+assertThat $.content.username JRichardsz
+assertThat $.content.mail jrichardsz.java@gmail.com
