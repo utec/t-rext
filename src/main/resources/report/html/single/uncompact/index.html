@@ -1,0 +1,56 @@
+<html>
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <title>
+    T-Rext Report
+  </title>
+  <link rel="stylesheet" href="style.css">
+
+  <script type="text/javascript" src="Chart.js"></script>
+
+</head>
+
+<body>
+  
+  <div class="container" style="text-align: center; width: 50%;">
+
+    <h1>T-Rext Feature Report</h1>
+    <h2 id="featureName"></h2>
+
+    <h4 id="featureDescription"></h4>
+
+    <h2 style="text-align: center">Result</h2>
+    <h2 style="text-align: center" id="date"></h2>
+  </div>
+  
+  <div style="text-align: center;width: 25%;display: block;margin: 0 auto;" >
+    <canvas id="myChart"></canvas>
+  </div> 
+
+  
+  <br><br>
+  <table id="table" cellspacing="0">
+    <thead>
+      <tr>
+        <td class="test-result-table-header-cell">
+          Scenario
+        </td>
+        <td class="test-result-table-header-cell">
+          asserts
+        </td>
+        <td class="test-result-table-header-cell">
+          duration
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script type="text/javascript" src="main.js"></script>
+
+</body>
+
+</html>

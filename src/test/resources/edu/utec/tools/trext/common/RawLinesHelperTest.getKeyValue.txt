@@ -1,0 +1,5 @@
+header Content-Type = application/json
+header token = UkaUkaUkaUka  
+header apikey =   123456789
+header Access-Control-Expose-Headers = X-My-Custom-Header, X-Another-Custom-Header
+header Access-Control-Max-Age	2520

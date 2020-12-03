@@ -1,0 +1,300 @@
+<html>
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <title>T-Rext Report</title>
+  <style type="text/css">
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td,
+    th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+      width: 25%;
+    }
+
+    .test-result-table {
+      border: 1px solid black;
+      width: 800px;
+    }
+
+    .test-result-table-header-cell {
+      border-bottom: 1px solid black;
+      background-color: silver;
+    }
+
+    .test-result-step-command-cell {
+      border-bottom: 1px solid gray;
+    }
+
+    .test-result-step-description-cell {
+      border-bottom: 1px solid gray;
+    }
+
+    .test-result-step-result-cell-ok {
+      border-bottom: 1px solid gray;
+      background-color: green;
+    }
+
+    .test-result-step-result-cell-failure {
+      border-bottom: 1px solid gray;
+      background-color: red;
+    }
+
+    .test-result-step-result-cell-notperformed {
+      border-bottom: 1px solid gray;
+      background-color: white;
+    }
+
+    .test-result-describe-cell {
+      background-color: tan;
+      font-style: italic;
+    }
+
+    .test-cast-status-box-ok {
+      border: 1px solid black;
+      float: left;
+      margin-right: 10px;
+      width: 45px;
+      height: 25px;
+      background-color: green;
+    }
+
+    .error {
+      width: 100%;
+      height: 100%;
+      top: 0px;
+      left: 0px;
+      background: #202020;
+      font-size: 11px;
+      font-family: Courier;
+      color: #DFDFDF;
+    }
+
+    .error pre {
+      white-space: pre-wrap;
+      /* Since CSS 2.1 */
+      white-space: -moz-pre-wrap;
+      /* Mozilla, since 1999 */
+      white-space: -pre-wrap;
+      /* Opera 4-6 */
+      white-space: -o-pre-wrap;
+      /* Opera 7 */
+      word-wrap: break-word;
+      /* Internet Explorer 5.5+ */
+    }
+
+    .clickable {
+      cursor: pointer;
+    }
+
+    .container {
+      width: 25%;
+      margin: 15px auto;
+    }
+  </style>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0-rc.1/Chart.js"></script>
+  <script type="text/javascript">
+    var report = 
+    %s
+    ;
+  </script>
+
+</head>
+
+<body>
+
+  <div class="container" style="text-align: center; width: 50%;">
+
+    <h1>T-Rext Feature Report</h1>
+    <h2 id="featureName"></h2>
+
+    <h4 id="featureDescription"></h4>
+
+    <h2 style="text-align: center">Result</h2>
+    <h2 style="text-align: center" id="date"></h2>
+  </div>
+  
+  <div style="text-align: center;width: 25%;display: block;margin: 0 auto;" >
+    <canvas id="myChart"></canvas>
+  </div> 
+
+
+  <br>
+  <br>
+  <table id="table" cellspacing="0">
+    <thead>
+      <tr>
+        <td class="test-result-table-header-cell">Scenario</td>
+        <td class="test-result-table-header-cell">asserts</td>
+        <td class="test-result-table-header-cell">duration</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+
+  <script type="text/javascript">
+    function main(data) {
+      console.log(data);
+      var table = document.getElementById("table").getElementsByTagName('tbody')[0];
+
+      document.getElementById("featureName").innerHTML = data.featureName;
+      document.getElementById("featureDescription").innerHTML = data.featureDesc;
+
+      data.scenarioStats.forEach(function(scenarioStat, i) {
+        var row = table.insertRow();
+        row.id = i;
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        var cell3 = row.insertCell(2);
+        cell1.innerHTML = scenarioStat.name;
+        cell2.innerHTML = scenarioStat.asserts;
+        cell3.innerHTML = scenarioStat.duration;
+
+        cell1.className = 'test-result-step-command-cell'
+
+       	if (scenarioStat.http === 'passed' && scenarioStat.asserts === 'passed' && scenarioStat.context === 'passed') {
+          cell2.className = 'test-result-step-result-cell-ok'
+        } else {
+          row.className = 'clickable'
+          cell2.className = 'test-result-step-result-cell-failure'
+          row.onclick = function() {
+            var rowId = this.id;
+            if (document.getElementById(`httpError_${rowId}`)) {
+              var currentDisplay = document.getElementById(`httpError_${rowId}`).style.display;
+              document.getElementById(`httpError_${rowId}`).style.display = (currentDisplay === 'none' ? "" : "none");
+            }
+            if (document.getElementById(`assertError_${rowId}`)) {
+              var currentDisplay = document.getElementById(`assertError_${rowId}`).style.display;
+              document.getElementById(`assertError_${rowId}`).style.display = (currentDisplay === 'none' ? "" : "none");
+            }
+            if (document.getElementById(`contextError_${rowId}`)) {
+              var currentDisplay = document.getElementById(`contextError_${rowId}`).style.display;
+              document.getElementById(`contextError_${rowId}`).style.display = (currentDisplay === 'none' ? "" : "none");
+            }
+            if (document.getElementById(`globalVariables_${rowId}`)) {
+              let currentDisplay = document.getElementById(`globalVariables_${rowId}`).style.display;
+              document.getElementById(`globalVariables_${rowId}`).style.display = (currentDisplay === 'none' ? "" : "none");
+            }
+            if (document.getElementById(`localHttpRequestVariables_${rowId}`)) {
+              var currentDisplay = document.getElementById(`localHttpRequestVariables_${rowId}`).style.display;
+              document.getElementById(`localHttpRequestVariables_${rowId}`).style.display = (currentDisplay === 'none' ? "" : "none");
+            }
+            if (document.getElementById(`localHttpResponseVariables_${rowId}`)) {
+              var currentDisplay = document.getElementById(`localHttpResponseVariables_${rowId}`).style.display;
+              document.getElementById(`localHttpResponseVariables_${rowId}`).style.display = (currentDisplay === 'none' ? "" : "none");
+            }
+
+          };
+        }
+
+        cell3.className = 'test-result-step-command-cell'
+
+        //add errors
+
+        var logAdvice = "More verbose log in java console. Also add -debug to get even more logs."
+
+        if (typeof scenarioStat.httpError !== 'undefined' && scenarioStat.httpError != null) {
+          var errorAsString = scenarioStat.httpError.join("\n");
+          createErrorRow(table, `httpError_${i}`, `Http error log. (${logAdvice})\n\n${errorAsString}`)
+        }
+
+        if (typeof scenarioStat.assertsError !== 'undefined' && scenarioStat.assertsError != null) {
+          var errorAsString = scenarioStat.assertsError.join("\n");
+          createErrorRow(table, `assertError_${i}`, `Assert error log. (${logAdvice})\n\n${errorAsString}`)
+        }
+
+        if (typeof scenarioStat.contextError !== 'undefined' && scenarioStat.contextError != null) {
+          var errorAsString = scenarioStat.contextError.join("\n");
+          createErrorRow(table, `contextError_${i}`, `Context error log. (${logAdvice})\n\n${errorAsString}`)
+        }
+        if (scenarioStat.http != "passed" || scenarioStat.asserts != "passed" || scenarioStat.context != "passed") {
+    		console.log(scenarioStat);
+    		createErrorRow(table, "globalVariables_" + i, "Global variables \n\n" + JSON.stringify(data.globalVariables, null, 4));
+    		createErrorRow(table, "localHttpRequestVariables_" + i, "Http Request variables \n\n" + variablesToString(data.localHttpRequestVariables));
+    		createErrorRow(table, "localHttpResponseVariables_" + i, "Http Response variables \n\n" + variablesToString(data.localHttpResponseVariables));
+    	}
+      });
+    }
+
+    function variablesToString(variables) {
+      var finalString;
+      if (typeof variables.body !== 'undefined' && variables.body != null) {
+        var body = variables.body;
+        delete variables.body;
+        var variablesAsString = JSON.stringify(variables, null, 4);
+        var bodyAsPrettyString = stringifyIfIsJson(body);
+        finalString = `${variablesAsString}\n\n\Http Body \n\n${bodyAsPrettyString}`
+      } else {
+        var variablesAsString = JSON.stringify(variables, null, 4)
+        finalString = `${variablesAsString}`
+      }
+
+      return finalString;
+    }
+
+    function stringifyIfIsJson(string) {
+      try {
+        var obj = JSON.parse(string);
+        return JSON.stringify(obj, null, 4)
+      } catch (err) {
+        return string;
+      }
+    }
+
+    function createErrorRow(table, rowId, errorText) {
+      var errorRow = table.insertRow();
+      errorRow.id = rowId;
+      errorRow.style = "display:none"
+      var errorCell = errorRow.insertCell();
+      errorCell.setAttribute("colspan", 3);
+      errorCell.className = 'error'
+      var pre = document.createElement("pre");
+      pre.textContent = errorText;
+      errorCell.appendChild(pre);
+    }
+
+    function showChart(data) {
+
+      document.getElementById("date").innerHTML = data.date;
+
+      var total = data.total;
+      var passed = (data.passed > 0 ? Math.round((data.passed * 100) / total) : 0);
+      var pending = (data.pending > 0 ? Math.round((data.pending * 100) / total) : 0);
+      var failed = (data.failed > 0 ? Math.round((data.failed * 100) / total) : 0);
+
+      var ctx = document.getElementById("myChart").getContext('2d');
+      var myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: [`Passed ${passed} %`, `Failed ${failed} %`, `Pending ${pending} %`],
+          datasets: [{
+            backgroundColor: [
+              "#2ecc71",
+              "#ff2c2c",
+              "#95a5a6"
+            ],
+            data: [passed, failed, pending]
+          }]
+        }
+      });
+
+
+    }
+
+    main(report);
+    showChart(report);
+  </script>
+
+</body>
+
+</html>

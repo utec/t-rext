@@ -1,0 +1,6 @@
+assertThat "Java" isEqualTo "Java"
+assertThat $.firstName isEqualTo "John"
+assertThat $.lastName isEqualTo ${lastNameFromCsv}
+assertThat $.age isEqualTo ${ageFromCsv}
+assertThat $.phoneNumbers[0].type isEqualTo "iPhone"
+assertThat ${isAdmin} isEqualTo false

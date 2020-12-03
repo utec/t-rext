@@ -1,0 +1,7 @@
+atem accusantium doloremque laudantiu
+atem accusantium doloremque laudantiu
+context
+setVar "personId" $.personId
+setVar "numDocument" $.content.debts[0].document.number   
+atem accusantium doloremque laudantiu
+atem accusantium doloremque laudantiu

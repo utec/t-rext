@@ -1,0 +1,39 @@
+Feature:   Google Searching           
+As a web surfer, I want to search Google, so that I can learn new things.
+
+Scenario: Fetch user
+url https://some-api.com/api/user
+header apiKey = 123456789
+header h1 = v1
+method post
+body
+```
+{
+  "menu": {
+    "id": "file",
+    "value": "File",
+    "popup": {
+      "menuitem": [
+        {
+          "value": "New",
+          "onclick": "CreateNewDoc()"
+        },
+        {
+          "value": "Open",
+          "onclick": "OpenDoc()"
+        },
+        {
+          "value": "Close",
+          "onclick": "CloseDoc()"
+        }
+      ]
+    }
+  }
+}
+```
+asserts
+equal status 200
+equal $.content.username JRichardsz
+equal $.content.mail jrichardsz.java@gmail.com
+
+
