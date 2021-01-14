@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import edu.utec.test.common.TestResourceHelper;
+import edu.utec.test.common.TestHelper;
 import edu.utec.test.junit.DefaultOrderedRunner;
 import edu.utec.test.junit.ExplicitOrder;
 import edu.utec.tools.trext.common.FileHelper;
@@ -23,8 +23,8 @@ public class FeatureTranslatorTest {
   @Test
   public void getFeatureNameAndDescription() throws Exception {
 
-    File file = TestResourceHelper
-        .getFile("edu/utec/tools/trext/bdd/translator/getFeatureNameAndDescription.txt");
+    File file =
+        TestHelper.getFile("edu/utec/tools/trext/bdd/translator/getFeatureNameAndDescription.txt");
 
     FeatureTranslator featureTranslator = new FeatureTranslator();
     Feature feature = featureTranslator.parse(file);
@@ -37,8 +37,8 @@ public class FeatureTranslatorTest {
   @Test
   public void getScenarioMinimalFields() throws Exception {
 
-    File file = TestResourceHelper
-        .getFile("edu/utec/tools/trext/bdd/translator/getScenariosMinimalFields.txt");
+    File file =
+        TestHelper.getFile("edu/utec/tools/trext/bdd/translator/getScenariosMinimalFields.txt");
 
     FeatureTranslator featureTranslator = new FeatureTranslator();
     Feature feature = featureTranslator.parse(file);
@@ -62,7 +62,7 @@ public class FeatureTranslatorTest {
   @Test
   public void getScenarioOptionalHeaderFields() throws Exception {
 
-    File file = TestResourceHelper
+    File file = TestHelper
         .getFile("edu/utec/tools/trext/bdd/translator/getScenarioOptionalHeaderFields.txt");
 
     FeatureTranslator featureTranslator = new FeatureTranslator();
@@ -86,7 +86,7 @@ public class FeatureTranslatorTest {
   @Test
   public void getScenarioOptionalAssertFields() throws Exception {
 
-    File file = TestResourceHelper
+    File file = TestHelper
         .getFile("edu/utec/tools/trext/bdd/translator/getScenarioOptionalAssertFields.txt");
 
     FeatureTranslator featureTranslator = new FeatureTranslator();
@@ -118,7 +118,7 @@ public class FeatureTranslatorTest {
 
     String regex = "^\\s*Scenario\\s*:\\s*.+";
     ArrayList<ArrayList<String>> rawScenarios =
-        RawLinesHelper.getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
+        RawLinesHelper.getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
 
     assertNotNull(rawScenarios);
     assertEquals(2, rawScenarios.size());

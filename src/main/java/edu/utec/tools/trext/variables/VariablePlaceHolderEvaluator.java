@@ -24,7 +24,7 @@ public class VariablePlaceHolderEvaluator {
     while (m.find()) {
 
       String key = m.group(0).replace("${", "").replace("}", "");
-      logger.debug(String.format("var was found [%s] ", key));
+      logger.debug(String.format("variable was detected: %s in raw string: %s", key, rawString));
 
       if (key == null || key.equals("")) {
         continue;
@@ -38,8 +38,14 @@ public class VariablePlaceHolderEvaluator {
         logger.debug("variable is a jocker");
         rawString = rawString.replace(String.format("${%s}", key),
             VariablePlaceHolderHelper.parseJocker(key));
+      } else if (System.getenv(key) != null && !System.getenv(key).isEmpty()) {
+        logger.debug("variable is a system environment variable");
+        rawString = rawString.replace(String.format("${%s}", key),
+            VariablePlaceHolderHelper.getStringRepresentation(System.getenv(key)));
       } else {
-        logger.debug("variable does not exist in context nor is a jocker. Context:" + variables);
+        logger.debug(
+            "Variable is not a jocker and does not exist in T-Rext context or s.o environment"
+                + variables);
       }
     }
     return rawString;
@@ -51,10 +57,37 @@ public class VariablePlaceHolderEvaluator {
     HashMap<String, Object> newMap = new HashMap<String, Object>();
 
     for (Entry<String, ?> entry : rawMap.entrySet()) {
+      logger.debug("variable name: " + entry.getKey());
       newMap.put((String) entry.getKey(),
           replaceVariablesAndJockersInString((String) entry.getValue(), variables));
     }
 
     return newMap;
+  }
+
+  /*
+   * Lookup values in the operative system environment.
+   */
+  public String evaluteValueIfIsEnvironmentVariable(String rawKey) throws Exception {
+    String regex = "(\\$\\{[\\w\\^\\$\\s]+\\})";
+    Matcher m = Pattern.compile(regex).matcher(rawKey);
+    while (m.find()) {
+      String key = m.group(0).replace("${", "").replace("}", "");
+      logger.debug(String.format("variable was detected: %s in raw key: %s", key, rawKey));
+
+      if (key == null || key.equals("")) {
+        continue;
+      }
+
+      if (System.getenv(key) != null && !System.getenv(key).isEmpty()) {
+        logger.debug("variable is a system variable");
+        // TODO
+        // rawKey = rawKey.replace(String.format("${%s}", key),
+        // VariablePlaceHolderHelper.getStringRepresentation(System.getenv(key)));
+        rawKey = rawKey.replace(String.format("${%s}", key), System.getenv(key));
+      }
+    }
+
+    return rawKey;
   }
 }

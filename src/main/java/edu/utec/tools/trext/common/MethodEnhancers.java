@@ -1,15 +1,16 @@
 package edu.utec.tools.trext.common;
 
-public class MethodProperties {
+public class MethodEnhancers {
 
   private static java.util.Properties properties;
 
   private static void initialize() throws Exception {
     properties = new java.util.Properties();
     try {
-      properties.load(MethodProperties.class.getResourceAsStream("/methods_enhancer.properties"));
+      properties.load(MethodEnhancers.class.getResourceAsStream("/methods_enhancer.properties"));
     } catch (Exception e) {
-      throw new Exception("Failed to read: assert_enhancer.properties", e);
+      throw new Exception(
+          "Failed to read: methods_enhancer.properties which must be inside of t-rext", e);
     }
   }
 

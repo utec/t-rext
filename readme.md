@@ -1,4 +1,4 @@
-![coverage](https://i.ibb.co/NthWkg9/coverage-status.png)
+![coverage](https://i.ibb.co/MZnwyJW/trext-coverage.png)
 
 ![https://i.ibb.co/QDCfKkm/trext-150.png](https://i.ibb.co/QDCfKkm/trext-150.png)
 
@@ -89,6 +89,7 @@ java -jar t-rext.jar -mode auto -directory /tmp/hello_world
 | isLessThan | this < value |  assertThat $.age isLessThan 10 |
 | isGreaterThanOrEqualTo | this >= value |  assertThat $.age isGreaterThanOrEqualTo 5 |
 | isLessThanOrEqualTo | this <= value |  assertThat $.age isLessThanOrEqualTo 10 |
+| .length() | return the element quantity of collection/array |  assertThat $.books.length() isGreaterThan 5 |
 
 # Special variables
 
@@ -98,7 +99,7 @@ java -jar t-rext.jar -mode auto -directory /tmp/hello_world
 
 # Advanced settings
 
-More details in [wiki](#)
+More details in [wiki](https://github.com/utec/t-rext/wiki)
 
 # TO DO
 

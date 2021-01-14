@@ -55,11 +55,13 @@ public class TrextCmdEntrypoint {
       MultipleMode multipleMode = new MultipleMode();
       status = multipleMode.run(reportType, cmd.getOptionValue("variables"),
           cmd.getOptionValue("features_directory_location"),
-          cmd.getOptionValue("report_directory_location"), cmd.hasOption("debug"));
+          cmd.getOptionValue("report_directory_location"), cmd.getOptionValue("exclude_file_names"),
+          cmd.hasOption("debug"));
     } else if (cmd.getOptionValue("mode").contentEquals("auto")) {
       // IA mode will try to detect which mode is: single or multiple
       AutomaticModeHelper automaticModeHelper = new AutomaticModeHelper();
-      HashMap<String, String> arguments = automaticModeHelper.analize(cmd.getOptionValue("directory"));
+      HashMap<String, String> arguments =
+          automaticModeHelper.analize(cmd.getOptionValue("directory"), cmd.getOptionValue("exclude_file_names"));
       logger.info("detected arguments:" + arguments);
       if (arguments.get("mode").contentEquals("single")) {
         SingleMode singleMode = new SingleMode();
@@ -70,7 +72,8 @@ public class TrextCmdEntrypoint {
         MultipleMode multipleMode = new MultipleMode();
         status = multipleMode.run(reportType, arguments.get("variables"),
             arguments.get("features_directory_location"),
-            arguments.get("report_directory_location"), cmd.hasOption("debug"));
+            arguments.get("report_directory_location"), cmd.getOptionValue("exclude_file_names"),
+            cmd.hasOption("debug"));
       }
 
     }

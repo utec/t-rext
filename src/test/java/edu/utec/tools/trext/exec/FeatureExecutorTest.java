@@ -14,9 +14,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import edu.utec.test.common.TestResourceHelper;
+import edu.utec.test.common.TestHelper;
 import edu.utec.test.junit.DefaultOrderedRunner;
 import edu.utec.test.junit.ExplicitOrder;
+import edu.utec.tools.trext.common.LoggerHelper;
 
 @RunWith(DefaultOrderedRunner.class)
 @ExplicitOrder({"oneScenario", "twoScenarios", "twoScenariosPropagateVariable",
@@ -64,8 +65,8 @@ public class FeatureExecutorTest {
   @SuppressWarnings("unchecked")
   @Test
   public void oneScenario() throws Exception {
-
-    File file = TestResourceHelper.getFile("edu/utec/tools/trext/executor/oneGetScenario.txt");
+    LoggerHelper.setDebugLevel();
+    File file = TestHelper.getFile("edu/utec/tools/trext/executor/oneGetScenario.txt");
     FeatureExecutor executor = new FeatureExecutor();
     HashMap<String, Object> report = executor.singleSafeExecute(file, new HashMap<String, Object>());
 
@@ -80,7 +81,7 @@ public class FeatureExecutorTest {
   @Test
   public void twoScenarios() throws Exception {
 
-    File file = TestResourceHelper.getFile("edu/utec/tools/trext/executor/twoGetScenarios.txt");
+    File file = TestHelper.getFile("edu/utec/tools/trext/executor/twoGetScenarios.txt");
     FeatureExecutor executor = new FeatureExecutor();
     HashMap<String, Object> report = executor.singleSafeExecute(file, new HashMap<String, Object>());
 
@@ -101,7 +102,7 @@ public class FeatureExecutorTest {
   @Test
   public void twoScenariosPropagateVariable() throws Exception {
 
-    File file = TestResourceHelper
+    File file = TestHelper
         .getFile("edu/utec/tools/trext/executor/twoGetScenariosPropagateVariable.txt");
     FeatureExecutor executor = new FeatureExecutor();
     HashMap<String, Object> report = executor.singleSafeExecute(file, new HashMap<String, Object>());
@@ -123,7 +124,7 @@ public class FeatureExecutorTest {
   public void oneScenarioInvalidAssert() throws Exception {
 
     File file =
-        TestResourceHelper.getFile("edu/utec/tools/trext/executor/oneGetScenarioInvalidAssert.txt");
+        TestHelper.getFile("edu/utec/tools/trext/executor/oneGetScenarioInvalidAssert.txt");
     FeatureExecutor executor = new FeatureExecutor();
     HashMap<String, Object> report = executor.singleSafeExecute(file, new HashMap<String, Object>());
 
@@ -143,7 +144,7 @@ public class FeatureExecutorTest {
   @Test
   public void onePostScenario() throws Exception {
 
-    File file = TestResourceHelper.getFile("edu/utec/tools/trext/executor/onePostScenario.txt");
+    File file = TestHelper.getFile("edu/utec/tools/trext/executor/onePostScenario.txt");
     FeatureExecutor executor = new FeatureExecutor();
     HashMap<String, Object> report = executor.singleSafeExecute(file, new HashMap<String, Object>());
 
@@ -158,7 +159,7 @@ public class FeatureExecutorTest {
   @Test
   public void getAndPostWithVariablePropagation() throws Exception {
 
-    File file = TestResourceHelper.getFile("edu/utec/tools/trext/executor/getAndPostScenario.txt");
+    File file = TestHelper.getFile("edu/utec/tools/trext/executor/getAndPostScenario.txt");
     FeatureExecutor executor = new FeatureExecutor();
     HashMap<String, Object> report = executor.singleSafeExecute(file, new HashMap<String, Object>());
 

@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import edu.utec.test.common.TestResourceHelper;
+import edu.utec.test.common.TestHelper;
 import edu.utec.test.junit.DefaultOrderedRunner;
 import edu.utec.test.junit.ExplicitOrder;
 
@@ -27,25 +27,25 @@ public class RawLinesHelperTest {
   @Test
   public void getMultilineValueBySimpleAndUniqueFieldName() throws Exception {
 
-    File file = TestResourceHelper.getFile(
+    File file = TestHelper.getFile(
         "edu/utec/tools/trext/bdd/translator/getMultilineValueBySimpleAndUniqueFieldName.txt");
 
     ArrayList<String> lines = FileHelper.getFileAsLines(file);
 
     String regex = "^\\s*Scenario\\s*:\\s*.+";
     ArrayList<ArrayList<String>> rawScenarios =
-        RawLinesHelper.getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
+        RawLinesHelper.getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
 
     assertNotNull(rawScenarios);
     assertEquals(1, rawScenarios.size());
 
-    String body = RawLinesHelper.getMultilineValueBySimpleAndUniqueFieldName(rawScenarios.get(0),
-        "body", "^```\\s*", "^```\\s*");
+    String body = RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(
+        rawScenarios.get(0), "body", "^```\\s*", "^```\\s*");
 
     // get expected body from another file because
     // is a big string
 
-    File filetmp = TestResourceHelper.getFile(
+    File filetmp = TestHelper.getFile(
         "edu/utec/tools/trext/bdd/translator/getMultilineValueBySimpleAndUniqueFieldName_expected.txt");
 
     ArrayList<String> linesTmp = FileHelper.getFileAsLines(filetmp);
@@ -58,13 +58,13 @@ public class RawLinesHelperTest {
   @Test
   public void getRawScenarios() throws Exception {
 
-    File file = TestResourceHelper.getFile("edu/utec/tools/trext/bdd/translator/FeatureDemo.txt");
+    File file = TestHelper.getFile("edu/utec/tools/trext/bdd/translator/FeatureDemo.txt");
 
     ArrayList<String> lines = FileHelper.getFileAsLines(file);
 
     String regex = "^\\s*Scenario\\s*:\\s*.+";
     ArrayList<ArrayList<String>> rawScenarios =
-        RawLinesHelper.getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
+        RawLinesHelper.getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
 
     assertNotNull(rawScenarios);
     assertEquals(2, rawScenarios.size());
@@ -77,13 +77,13 @@ public class RawLinesHelperTest {
   @Test
   public void getUniqueRawLineWhichStartsWith() throws Exception {
 
-    File file = TestResourceHelper.getFile("edu/utec/tools/trext/bdd/translator/FeatureDemo.txt");
+    File file = TestHelper.getFile("edu/utec/tools/trext/bdd/translator/FeatureDemo.txt");
 
     ArrayList<String> lines = FileHelper.getFileAsLines(file);
 
     String regex = "^\\s*Scenario\\s*:\\s*.+";
     ArrayList<ArrayList<String>> rawScenarios =
-        RawLinesHelper.getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
+        RawLinesHelper.getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
 
     assertNotNull(rawScenarios);
     assertEquals(2, rawScenarios.size());
@@ -100,11 +100,11 @@ public class RawLinesHelperTest {
   @Test
   public void getBody() throws Exception {
 
-    File file = TestResourceHelper.getFile(this, "getBody.txt");
+    File file = TestHelper.getFile(this, "getBody.txt");
     ArrayList<String> lines = FileHelper.getFileAsLines(file);
 
-    String body = RawLinesHelper.getMultilineValueBySimpleAndUniqueFieldName(lines, "body",
-        "^```\\s*", "^```\\s*");
+    String body = RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(lines,
+        "body", "^```\\s*", "^```\\s*");
     DocumentContext parsedResponse = JsonPath.parse(body);
     assertEquals("aaaa", (String) parsedResponse.read("$.product"));
     assertEquals("bbb", (String) parsedResponse.read("$.queryType"));
@@ -114,17 +114,17 @@ public class RawLinesHelperTest {
   @Test
   public void getEmptyBody() throws Exception {
 
-    File file = TestResourceHelper.getFile(this, "getEmptyBody.txt");
+    File file = TestHelper.getFile(this, "getEmptyBody.txt");
     ArrayList<String> lines = FileHelper.getFileAsLines(file);
 
-    String body = RawLinesHelper.getMultilineValueBySimpleAndUniqueFieldName(lines, "body",
-        "^```\\s*", "^```\\s*");
+    String body = RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(lines,
+        "body", "^```\\s*", "^```\\s*");
     assertEquals(0, body.length());
   }
 
   @Test
   public void getRawUrl() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawUrl.txt");
+    File file = TestHelper.getFile(this, "getRawUrl.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
     String urlLine = RawLinesHelper.getUniqueRawLineWhichStartsWith("url", rawLines, true);
     assertEquals("url https://www.lipsum.com/", urlLine);
@@ -132,7 +132,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getRawMethod() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawMethod.txt");
+    File file = TestHelper.getFile(this, "getRawMethod.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
 
     String methodLine = RawLinesHelper.getUniqueRawLineWhichStartsWith("method", rawLines, true);
@@ -141,7 +141,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getRawDisabled() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawDisabled.txt");
+    File file = TestHelper.getFile(this, "getRawDisabled.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
 
     String disabledLine =
@@ -151,7 +151,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getRawDisabledWhenNotExist() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawDisabledWhenNotExist.txt");
+    File file = TestHelper.getFile(this, "getRawDisabledWhenNotExist.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
 
     String disabledLine =
@@ -161,7 +161,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getRawHeaders() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawHeaders.txt");
+    File file = TestHelper.getFile(this, "getRawHeaders.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
 
     ArrayList<String> multipleLines = RawLinesHelper.getRawLinesWichStartsWith("header", rawLines);
@@ -172,7 +172,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getRawAsserts() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawAsserts.txt");
+    File file = TestHelper.getFile(this, "getRawAsserts.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
 
     String regex1 = "^\\s*asserts\\s*";
@@ -191,7 +191,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getRawContext() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getRawContext.txt");
+    File file = TestHelper.getFile(this, "getRawContext.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
 
     String regex1 = "^\\s*context\\s*";
@@ -210,7 +210,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getFeatureData() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getFeatureData.txt");
+    File file = TestHelper.getFile(this, "getFeatureData.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
     ArrayList<String> data = RawLinesHelper.getValueFromKey("Feature", rawLines, true);
     assertEquals(2, data.size());
@@ -222,7 +222,7 @@ public class RawLinesHelperTest {
 
   @Test
   public void getKeyValue() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getKeyValue.txt");
+    File file = TestHelper.getFile(this, "getKeyValue.txt");
     ArrayList<String> rawLines = FileHelper.getFileAsLines(file);
     HashMap<String, String> keyValuePairs = RawLinesHelper.getKeyValue(rawLines, "header", "=");
     assertEquals(4, keyValuePairs.size());
@@ -232,6 +232,102 @@ public class RawLinesHelperTest {
     assertEquals("X-My-Custom-Header, X-Another-Custom-Header",
         keyValuePairs.get("Access-Control-Expose-Headers"));
 
+  }
+
+  @Test
+  public void getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLineNotFoundLines()
+      throws Exception {
+
+    ArrayList<String> lines = new ArrayList<String>();
+    lines.add("foo");
+    lines.add("");
+    lines.add("");
+    lines.add("");
+
+    try {
+      RawLinesHelper.getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine("^foo", lines);
+    } catch (Exception e) {
+      assertEquals(true, e.getMessage().startsWith("no one line meets the end regex"));
+    }
+  }
+
+  @Test
+  public void getMultilineStringUsingUniqueFieldNameAndRegexBoundariesErrorNoUnique()
+      throws Exception {
+
+    ArrayList<String> lines = new ArrayList<String>();
+    lines.add("ImUnique");
+    lines.add("foo");
+    lines.add("baz");
+    lines.add("qux");
+    lines.add("ImUnique");
+    lines.add("quux");
+    lines.add("bar");
+
+    try {
+      RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(lines, "ImUnique",
+          "^foo", "^bar");
+    } catch (Exception e) {
+      assertEquals(true, e.getMessage().startsWith("more than one line contains field"));
+    }
+  }
+
+  @Test
+  public void getMultilineStringUsingUniqueFieldNameAndRegexBoundariesErrorNoStartRegex()
+      throws Exception {
+
+    ArrayList<String> lines = new ArrayList<String>();
+    lines.add("ImUnique");
+    lines.add("imnotfoo");
+    lines.add("baz");
+    lines.add("qux");
+    lines.add("quux");
+    lines.add("bar");
+
+    try {
+      RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(lines, "ImUnique",
+          "^foo", "^bar");
+    } catch (Exception e) {
+      assertEquals(true, e.getMessage().startsWith(
+          "Field [ImUnique] was found, but the next line does not meet the start regex"));
+    }
+  }
+
+  @Test
+  public void getMultilineStringUsingUniqueFieldNameAndRegexBoundariesErrorEmptyStart()
+      throws Exception {
+
+    ArrayList<String> lines = new ArrayList<String>();
+    lines.add("ImUnique");
+    lines.add(null);
+    lines.add("baz");
+    lines.add("qux");
+    lines.add("quux");
+    lines.add("bar");
+
+    try {
+      RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(lines, "ImUnique",
+          "^foo", "^bar");
+    } catch (Exception e) {
+      assertEquals(true, e.getMessage().startsWith("null lines are not allowed"));
+    }
+  }
+
+  @Test
+  public void getMultilineStringUsingUniqueFieldNameAndRegexBoundariesErrorNotEnoughLines()
+      throws Exception {
+
+    ArrayList<String> lines = new ArrayList<String>();
+    lines.add("ImUnique");
+    lines.add("foo");
+    lines.add("baz");
+
+    try {
+      RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(lines, "ImUnique",
+          "^foo", "^bar");
+    } catch (Exception e) {
+      assertEquals(true, e.getMessage().contains("there are not enough lines"));
+    }
   }
 
 }

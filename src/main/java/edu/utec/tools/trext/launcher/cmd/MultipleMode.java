@@ -19,8 +19,8 @@ public class MultipleMode {
   private final Logger logger = LogManager.getLogger(MultipleMode.class);
 
   public boolean run(String reportType, String variablesFileLocation,
-      String multipleFeaturesDirectoryLocation, String reportLocation, boolean debug)
-      throws Exception {
+      String multipleFeaturesDirectoryLocation, String reportLocation, String regexToExcludeFiles,
+      boolean debug) throws Exception {
 
     if (debug) {
       LoggerHelper.setDebugLevel();
@@ -46,20 +46,20 @@ public class MultipleMode {
       throw new Exception("report folder " + reportLocation + " does not exist");
     }
 
-    logger.info("\n");
-
     File featuredDir = new File(multipleFeaturesDirectoryLocation);
     if (!featuredDir.exists()) {
       throw new Exception(
           "features folder " + multipleFeaturesDirectoryLocation + " does not exist");
     }
 
-    ArrayList<File> featureFiles = FileHelper.listFileTree(featuredDir, ".feature");
+    ArrayList<File> featureFiles =
+        FileHelper.listFileTree(featuredDir, ".feature", regexToExcludeFiles);
 
     HashMap<String, Object> featuresReport = new HashMap<String, Object>();
     ArrayList<HashMap<String, Object>> featuresStats = new ArrayList<HashMap<String, Object>>();
     int failedCount = 0;
     int passedCount = 0;
+    logger.info(String.format("T-Rext detected [%s] valid feature files", featureFiles.size()));
     for (File singleFeature : featureFiles) {
       logger.info("Feature file: " + singleFeature.getAbsolutePath());
       HashMap<String, Object> singleFeatureStats =

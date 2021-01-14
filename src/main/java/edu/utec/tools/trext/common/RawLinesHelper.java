@@ -11,10 +11,10 @@ public class RawLinesHelper {
 
   private static final Logger logger = LogManager.getLogger(RawLinesHelper.class);
 
-  public static ArrayList<ArrayList<String>> getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine(
+  public static ArrayList<ArrayList<String>> getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine(
       String regex, ArrayList<String> lines) throws Exception {
 
-    logger.debug("getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine");
+    logger.debug("getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine");
     logger.debug(lines.toString());
 
     ArrayList<ArrayList<String>> rawScenario = new ArrayList<ArrayList<String>>();
@@ -58,22 +58,27 @@ public class RawLinesHelper {
       }
     }
 
-    if (foundLines.size() == 0) {
+    if (foundLines.size() == 1) {
       throw new Exception(
-          String.format("no one line meets the end regex:%s starting from :%s", regex, startIndex));
+          String.format("no one line meets the end regex %s starting from %s", regex, startIndex));
     }
 
     return foundLines;
   }
 
-  public static String getMultilineValueBySimpleAndUniqueFieldName(ArrayList<String> lines,
-      String fieldName, String regexStart, String regexEnd) throws Exception {
+  public static String getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(
+      ArrayList<String> lines, String fieldName, String regexStart, String regexEnd)
+      throws Exception {
 
     int fieldDetectedCound = 0;
     int fieldIndex = -1;
 
     for (int a = 0; a < lines.size(); a++) {
       String line = lines.get(a);
+      if (line == null) {
+        throw new Exception("null lines are not allowed. Check who is calling this method: "
+            + "getMultilineStringUsingUniqueFieldNameAndRegexBoundaries");
+      }
       // search fieldName
       String regex = String.format("^%s", fieldName);
       Pattern pattern = Pattern.compile(regex);
@@ -94,8 +99,19 @@ public class RawLinesHelper {
           "more than one line contains field [%s]. Just one is allowd \n[%s]", fieldName, lines));
     }
 
-    if (lines.get(fieldIndex + 1) == null || lines.get(fieldIndex + 1).contentEquals("")
-        || !lines.get(fieldIndex + 1).matches(regexStart)) {
+
+    if (lines.size() < (fieldIndex + 1) + 3) {
+      logger.debug("lines.size():" + lines.size());
+      logger.debug("fieldIndex:" + fieldIndex);
+      logger.debug("expected lines size (fieldIndex+1) + 3:" + ((fieldIndex + 1) + 3));
+      throw new Exception(String.format(
+          "Field [%s] was found at index %s, but there are not enough lines to the start"
+              + " regex, payload lines and end regex."
+              + " At minimun 3 more lines are required after founded index. Current lines number: %s",
+          fieldName, fieldIndex, lines.size()));
+    }
+
+    if (!lines.get(fieldIndex + 1).matches(regexStart)) {
       throw new Exception(
           String.format("Field [%s] was found, but the next line does not meet the start regex[%s]",
               fieldName, regexStart));

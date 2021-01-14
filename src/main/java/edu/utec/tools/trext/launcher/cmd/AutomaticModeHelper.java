@@ -11,7 +11,8 @@ public class AutomaticModeHelper {
 
   private final Logger logger = LogManager.getLogger(AutomaticModeHelper.class);
 
-  public HashMap<String, String> analize(String directory) throws Exception {
+  public HashMap<String, String> analize(String directory, String regexToExcludeFiles)
+      throws Exception {
 
     logger.info(
         "Automatic mode will scan directory to detect which is the required mode: " + directory);
@@ -23,7 +24,8 @@ public class AutomaticModeHelper {
       throw new Exception("main folder " + directory + " does not exist");
     }
 
-    ArrayList<File> featureFiles = FileHelper.listFileTree(featuredDir,".feature");
+    ArrayList<File> featureFiles =
+        FileHelper.listFileTree(featuredDir, ".feature", regexToExcludeFiles);
 
     if (featureFiles.size() == 0) {
       throw new Exception("main folder " + directory + " does not contain any feature file");

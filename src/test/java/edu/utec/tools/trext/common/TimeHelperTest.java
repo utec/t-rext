@@ -11,7 +11,6 @@ public class TimeHelperTest {
     new TimeHelper();
   }
 
-
   @Test
   public void elapsedMillisToHumanExpression() throws Exception {
     assertEquals("0 min 3 seg 600 millis",

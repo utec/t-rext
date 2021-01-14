@@ -3,15 +3,9 @@ package edu.utec.tools.trext.method;
 import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import edu.utec.test.common.TestResourceHelper;
-import edu.utec.test.junit.DefaultOrderedRunner;
-import edu.utec.test.junit.ExplicitOrder;
+import edu.utec.test.common.TestHelper;
+import edu.utec.tools.trext.common.LoggerHelper;
 
-@RunWith(DefaultOrderedRunner.class)
-@ExplicitOrder({"evaluateJsonExpression", "methodEnhancer01SimpleValues",
-    "methodEnhancer01WithJsonPath", "methodEnhancer01WithVariables", "methodEnhancer02SimpleValues",
-    "methodEnhancer02WithJsonPath", "methodEnhancer02WithVariables"})
 public class MethodEnhancerTest {
 
   @Test
@@ -47,8 +41,8 @@ public class MethodEnhancerTest {
   public void methodEnhancer01WithJsonPath() throws Exception {
     MethodEnhancer methodEnhancer = new MethodEnhancer();
 
-    String json = TestResourceHelper
-        .getFileAsString("edu/utec/tools/trext/method/equalsEnhancerWithJsonPath.txt");
+    String json =
+        TestHelper.getFileAsString("edu/utec/tools/trext/method/equalsEnhancerWithJsonPath.txt");
 
     assertEquals("assertThat(\"John\").isEqualTo(\"John\")",
         methodEnhancer.rawStringToConsecutiveMethodsWithSingleArgument(
@@ -65,16 +59,17 @@ public class MethodEnhancerTest {
 
   @Test
   public void methodEnhancer01WithVariables() throws Exception {
+    LoggerHelper.setDebugLevel();
     MethodEnhancer methodEnhancer = new MethodEnhancer();
 
     HashMap<String, Object> variables = new HashMap<String, Object>();
     variables.put("firstName", "Jane");
-    variables.put("age", 26);
-    variables.put("isAdmin", false);
+    variables.put("age", "26");
+    variables.put("isAdmin", "false");
 
     assertEquals("assertThat(\"Jane\").isEqualTo(\"Jane\")",
         methodEnhancer.rawStringToConsecutiveMethodsWithSingleArgument(
-            "assertThat \"Jane\" isEqualTo ${firstName}", variables, null));
+            "assertThat \"Jane\" isEqualTo \"${firstName}\"", variables, null));
 
     assertEquals("assertThat(26).isEqualTo(26)",
         methodEnhancer.rawStringToConsecutiveMethodsWithSingleArgument(
@@ -105,8 +100,8 @@ public class MethodEnhancerTest {
   public void methodEnhancer02WithJsonPath() throws Exception {
     MethodEnhancer methodEnhancer = new MethodEnhancer();
 
-    String json = TestResourceHelper
-        .getFileAsString("edu/utec/tools/trext/method/equalsEnhancerWithJsonPath.txt");
+    String json =
+        TestHelper.getFileAsString("edu/utec/tools/trext/method/equalsEnhancerWithJsonPath.txt");
 
     assertEquals("setVar(\"Jane\",\"John\")", methodEnhancer
         .rawStringToOneMethodWithSeveralArguments("setVar \"Jane\" $.firstName", null, json));
@@ -128,8 +123,9 @@ public class MethodEnhancerTest {
     variables.put("age", 26);
     variables.put("isAdmin", false);
 
-    assertEquals("setVar(\"name\",\"Jane\")", methodEnhancer
-        .rawStringToOneMethodWithSeveralArguments("setVar \"name\" ${firstName}", variables, null));
+    assertEquals("setVar(\"name\",\"Jane\")",
+        methodEnhancer.rawStringToOneMethodWithSeveralArguments("setVar \"name\" \"${firstName}\"",
+            variables, null));
 
     assertEquals("setVar(\"name\",26)", methodEnhancer
         .rawStringToOneMethodWithSeveralArguments("setVar \"name\" ${age}", variables, null));
@@ -138,24 +134,48 @@ public class MethodEnhancerTest {
         methodEnhancer.rawStringToOneMethodWithSeveralArguments("setVar \"canDelete\" ${isAdmin}",
             variables, null));
   }
-  
+
   @Test
   public void methodEnhancerIncongruentTypes() throws Exception {
+    LoggerHelper.setDebugLevel();
+
     MethodEnhancer methodEnhancer = new MethodEnhancer();
-    
+
     String equals =
         methodEnhancer.rawStringToOneMethodWithSeveralArguments("setVar \"id\" 123", null, null);
     assertEquals("setVar(\"id\",123)", equals);
-    
-    equals =
-        methodEnhancer.rawStringToOneMethodWithSeveralArguments("setVar \"id\" \"123\"", null, null);
-    assertEquals("setVar(\"id\",\"123\")", equals);    
-    
-    String json = "{\"message\":\"hello\",\"id\":\"200\"}";    
-    
+
+    equals = methodEnhancer.rawStringToOneMethodWithSeveralArguments("setVar \"id\" \"123\"", null,
+        null);
+    assertEquals("setVar(\"id\",\"123\")", equals);
+
+    String json = "{\"message\":\"hello\",\"id\":\"200\"}";
+
     equals =
         methodEnhancer.rawStringToOneMethodWithSeveralArguments("setVar \"id\" $.id", null, json);
-    assertEquals("setVar(\"id\",\"200\")", equals);       
+    assertEquals("setVar(\"id\",\"200\")", equals);
 
-  }  
+  }
+
+  @Test
+  public void rawStringToConsecutiveMethodsWithSingleArgumentLong() throws Exception {
+
+
+    LoggerHelper.setDebugLevel();
+    MethodEnhancer methodEnhancer = new MethodEnhancer();
+
+    String json = TestHelper.getTestFileAsString(this,
+        "rawStringToConsecutiveMethodsWithSingleArgumentLong.txt");
+
+    assertEquals("assertThat(1598885893000).isEqualTo(1598885893000)",
+        methodEnhancer.rawStringToConsecutiveMethodsWithSingleArgument(
+            "assertThat $.id isEqualTo 1598885893000", null, json));
+
+    assertEquals("assertThat(1598885893000).isEqualTo(1598885893000)",
+        methodEnhancer.rawStringToConsecutiveMethodsWithSingleArgument(
+            "assertThat 1598885893000 isEqualTo $.id", null, json));
+
+    assertEquals("assertThat(1598885893000).isNotNull()", methodEnhancer
+        .rawStringToConsecutiveMethodsWithSingleArgument("assertThat $.id isNotNull", null, json));
+  }
 }

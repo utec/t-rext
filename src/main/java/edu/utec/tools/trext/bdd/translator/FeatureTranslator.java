@@ -37,7 +37,7 @@ public class FeatureTranslator {
 
   private ArrayList<ArrayList<String>> getRawScenarios(ArrayList<String> lines) throws Exception {
     String regex = "^\\s*Scenario\\s*:\\s*.+";
-    return RawLinesHelper.getGroupLinesAfterLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
+    return RawLinesHelper.getGroupLinesFromLineThatMeetsRegexAndEndsWithBlankLine(regex, lines);
   }
 
   private ArrayList<Scenario> getScenarios(ArrayList<String> lines) throws Exception {
@@ -67,8 +67,8 @@ public class FeatureTranslator {
   }
 
   private String getBody(ArrayList<String> rawLines) throws Exception {
-    return RawLinesHelper.getMultilineValueBySimpleAndUniqueFieldName(rawLines, "body", "^```\\s*",
-        "^```\\s*");
+    return RawLinesHelper.getMultilineStringUsingUniqueFieldNameAndRegexBoundaries(rawLines,
+        "body", "^```\\s*", "^```\\s*");
   }
 
   private String getUrl(ArrayList<String> rawLines) throws Exception {
