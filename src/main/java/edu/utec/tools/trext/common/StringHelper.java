@@ -12,6 +12,7 @@ public class StringHelper {
   private static final Logger logger = LogManager.getLogger(StringHelper.class);
 
   public static Object evaluateJsonExpression(String expresion, String json) throws Exception {
+    logger.debug("jsonapth expression:" + expresion);
 
     if (json == null || json.isEmpty()) {
       throw new Exception("Http body is null."
@@ -31,10 +32,10 @@ public class StringHelper {
     if (result instanceof JSONArray) {
       JSONArray results = (JSONArray) result;
       if (results.size() > 1) {
-        throw new Exception(String.format(
-            "Error originated when json_path expression %s was executing on http response: %s"
-                + " Json Path expression returns a JSONArray with more than one element. Which one I choose?",
-            expresion, json));
+        throw new Exception(
+            String.format("Error originated when json_path expression %s was executing."
+                + " Json Path expression returns a JSONArray with more than one element."
+                + " Which one I choose?. Json: %s", expresion, json));
       } else {
         return results.get(0);
       }
@@ -81,7 +82,6 @@ public class StringHelper {
     return id;
   }
 
-
   public static String enhanceSpacesInQuotedString(String line, String spaceEnhancer) {
     Pattern pattern = Pattern.compile("\"([^\"]*)\"");
     Matcher matcher = pattern.matcher(line);
@@ -90,7 +90,29 @@ public class StringHelper {
       String quotedEnhancedString = quotedString.replaceAll("\\s{1}", spaceEnhancer);
       line = line.replace(quotedString, quotedEnhancedString);
     }
-
     return line;
+  }
+
+  public static String getPayloadFromQuotedString(String rawString) {
+    return rawString.replaceFirst("\"", "").replaceAll("\"$", "");
+  }
+
+  public static String convertGeniuneValueToStringRepresentationSafe(Object value)
+      throws Exception {
+    logger.debug(String.format("transform %s to string representation", value));
+    if (DataTypeHelper.isString(value)) {
+      return String.format("\"%s\"", value);
+    } else if (DataTypeHelper.isInteger(value)) {
+      return "" + DataTypeHelper.getInt(value);
+    } else if (DataTypeHelper.isDouble(value)) {
+      return "" + DataTypeHelper.getDouble(value);
+    } else if (DataTypeHelper.isBoolean(value)) {
+      return "" + DataTypeHelper.getBoolean(value);
+    } else if (DataTypeHelper.isLong(value)) {
+      return "" + DataTypeHelper.getLong(value);
+    } else {
+      throw new Exception(
+          String.format("value %s or its class %s is not supported", value, value.getClass()));
+    }
   }
 }

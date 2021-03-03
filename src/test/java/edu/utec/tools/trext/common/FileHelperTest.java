@@ -2,12 +2,16 @@ package edu.utec.tools.trext.common;
 
 import static org.junit.Assert.assertEquals;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
-import edu.utec.test.common.TestResourceHelper;
+import edu.utec.test.common.TestHelper;
 
 public class FileHelperTest {
 
@@ -28,14 +32,14 @@ public class FileHelperTest {
 
   @Test
   public void getFileAsLines() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getFileAsLines.txt");
+    File file = TestHelper.getFile(this, "getFileAsLines.txt");
     ArrayList<String> lines = FileHelper.getFileAsLines(file);
     assertEquals(4, lines.size());
   }
 
   @Test
   public void getFileAsLinesCommented() throws Exception {
-    File file = TestResourceHelper.getFile(this, "getFileAsLinesCommented.txt");
+    File file = TestHelper.getFile(this, "getFileAsLinesCommented.txt");
     ArrayList<String> lines = FileHelper.getFileAsLines(file, true, "#");
     assertEquals(9, lines.size());
   }
@@ -78,7 +82,7 @@ public class FileHelperTest {
 
   @Test
   public void loadVariablesFromProperties() throws Exception {
-    File file = TestResourceHelper.getFile(this, "loadVariablesFromProperties.txt");
+    File file = TestHelper.getFile(this, "loadVariablesFromProperties.txt");
     HashMap<String, Object> variables = FileHelper.loadVariablesFromProperties(file);
     assertEquals("http://localhost:8080/v1/book", variables.get("apiBaseUrl"));
     assertEquals("Flores para ALgernon ${srand}", variables.get("bookTitle"));
@@ -146,5 +150,68 @@ public class FileHelperTest {
     ArrayList<File> emptyDir = FileHelper.listFileTree(new File(tempAbsolutePath), ".acme");
     assertEquals(0, emptyDir.size());
   }
+
+  @Test
+  public void listFileTreeWithExclude() throws Exception {
+    
+    LoggerHelper.setDebugLevel();
+
+    String tempAbsolutePath =
+        System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString();
+    File baseDirectory = new File(tempAbsolutePath);
+    if (!baseDirectory.exists()) {
+      baseDirectory.mkdirs();
+    }
+
+    for (int a = 0; a < 5; a++) {
+      Path path = Paths.get(tempAbsolutePath + "/read.acme." + a + ".feature");
+      File file = path.toFile();
+      Files.write(path, "Temporary content...".getBytes(StandardCharsets.UTF_8));
+      file.deleteOnExit();
+    }
+
+    // add an extra file, which must be excluded
+    Path path = Paths.get(tempAbsolutePath + "/write.acme.feature");
+    File file = path.toFile();
+    Files.write(path, "Temporary content...".getBytes(StandardCharsets.UTF_8));
+    file.deleteOnExit();
+
+    ArrayList<File> features = FileHelper.listFileTree(baseDirectory, ".feature", "^write");
+    assertEquals(5, features.size());
+  }
+  
+  @Test
+  public void listFileTreeWithNullExclude() throws Exception {
+    
+    LoggerHelper.setDebugLevel();
+
+    String tempAbsolutePath =
+        System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString();
+    File baseDirectory = new File(tempAbsolutePath);
+    if (!baseDirectory.exists()) {
+      baseDirectory.mkdirs();
+    }
+
+    for (int a = 0; a < 5; a++) {
+      Path path = Paths.get(tempAbsolutePath + "/read.acme." + a + ".feature");
+      File file = path.toFile();
+      Files.write(path, "Temporary content...".getBytes(StandardCharsets.UTF_8));
+      file.deleteOnExit();
+    }
+
+    // add an extra file, which must be excluded
+    Path path = Paths.get(tempAbsolutePath + "/write.acme.feature");
+    File file = path.toFile();
+    Files.write(path, "Temporary content...".getBytes(StandardCharsets.UTF_8));
+    file.deleteOnExit();
+
+    // null regex
+    ArrayList<File> features = FileHelper.listFileTree(baseDirectory, ".feature", null);
+    assertEquals(6, features.size());
+    
+    // empty regex
+    features = FileHelper.listFileTree(baseDirectory, ".feature", "");
+    assertEquals(6, features.size());
+  }  
 
 }

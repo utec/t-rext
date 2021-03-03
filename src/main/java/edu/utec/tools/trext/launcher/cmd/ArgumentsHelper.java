@@ -53,10 +53,14 @@ public class ArgumentsHelper {
     Option o7 = new Option("debug", "debug", false, "run application with a lot of log");
     o7.setRequired(false);
     options.addOption(o7);
-
+    
     Option o8 = new Option("d", "directory", true, "directory to be scanned");
     o8.setRequired(false);
     options.addOption(o8);
+
+    Option o9 = new Option("ex", "exclude_file_names", true, "java regex to exclude file(name) from feature files");
+    o9.setRequired(false);
+    options.addOption(o9);
 
     CommandLineParser parser = new DefaultParser();
     HelpFormatter formatter = new HelpFormatter();

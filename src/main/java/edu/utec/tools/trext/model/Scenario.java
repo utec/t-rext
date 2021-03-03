@@ -87,4 +87,11 @@ public class Scenario {
     this.disabled = disabled;
   }
 
+  @Override
+  public String toString() {
+    return "Scenario [id=" + id + ", name=" + name + ", url=" + url + ", method=" + method
+        + ", body=" + body + ", disabled=" + disabled + ", headers=" + headers + ", rawAsserts="
+        + rawAsserts + ", rawContext=" + rawContext + "]";
+  }
+
 }

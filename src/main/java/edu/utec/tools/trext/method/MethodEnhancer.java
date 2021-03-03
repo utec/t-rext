@@ -4,7 +4,7 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import edu.utec.tools.trext.common.DataTypeHelper;
-import edu.utec.tools.trext.common.MethodProperties;
+import edu.utec.tools.trext.common.MethodEnhancers;
 import edu.utec.tools.trext.common.StringHelper;
 
 public class MethodEnhancer {
@@ -14,6 +14,9 @@ public class MethodEnhancer {
 
   public String rawStringToConsecutiveMethodsWithSingleArgument(String rawMethodArgumentLine,
       HashMap<String, Object> variables, String httpBodyRawString) throws Exception {
+
+    logger.debug("convert raw string into consecutive methods with single argument");
+
     logger.debug("Line to evaluate: " + rawMethodArgumentLine);
     String rawMethodArgumentLineSpacesFixed =
         StringHelper.enhanceSpacesInQuotedString(rawMethodArgumentLine, spaceEnhancer);
@@ -21,50 +24,31 @@ public class MethodEnhancer {
     String[] rawMethodArgumentLinePartials = rawMethodArgumentLineSpacesFixed.split("\\s+");
     String finalAssertLine = "";
     String singleArgumentTemplate = "(%s)";
+
     for (int a = 1; a < rawMethodArgumentLinePartials.length; a++) {
       String rawArgumentOrMethod = rawMethodArgumentLinePartials[a].trim();
       logger.debug("Partial to evaluate: " + rawArgumentOrMethod);
       if (isMethod(rawArgumentOrMethod)) {
-        String evaluatedPartial = MethodProperties.getProperty(rawArgumentOrMethod);
-        logger.debug("Partial evaluated: " + evaluatedPartial);
-        finalAssertLine += evaluatedPartial;
-      } else if (DataTypeHelper.isInteger(rawArgumentOrMethod)
-          || DataTypeHelper.isDouble(rawArgumentOrMethod)
-          || DataTypeHelper.isBoolean(rawArgumentOrMethod)
-          || DataTypeHelper.isQuotedString(rawArgumentOrMethod)) {
-
-        String evaluatedPartial = String.format(singleArgumentTemplate, rawArgumentOrMethod);
+        logger.debug("Partial is a method");
+        String evaluatedPartial = MethodEnhancers.getProperty(rawArgumentOrMethod);
         logger.debug("Partial evaluated: " + evaluatedPartial);
         finalAssertLine += evaluatedPartial;
       } else if (DataTypeHelper.isQuotedString(rawArgumentOrMethod)) {
-        String evaluatedPartial = String.format(singleArgumentTemplate, rawArgumentOrMethod);
-        logger.debug("Partial evaluated: " + evaluatedPartial);
-        finalAssertLine += evaluatedPartial;
-      } else if (rawArgumentOrMethod.startsWith("$.")) {
-        // placeholder is a json expression
-        Object jsonPathEvaluatedValue =
-            StringHelper.evaluateJsonExpression(rawArgumentOrMethod, httpBodyRawString);
-        logger.debug(String.format("Partial is jsonpath exp: %s, output %s which is %s",
-            rawArgumentOrMethod, jsonPathEvaluatedValue, jsonPathEvaluatedValue.getClass()));
-        String evaluatedPartial =
-            convertValueToArgument(jsonPathEvaluatedValue, rawArgumentOrMethod);
-        logger.debug("Partial evaluated: " + evaluatedPartial);
-        finalAssertLine += evaluatedPartial;
-      } else if (rawArgumentOrMethod.startsWith("${") && rawArgumentOrMethod.endsWith("}")) {
-        // placeholder is a variable
-        Object evaluatedValue =
-            variables.get(rawArgumentOrMethod.replaceFirst("\\$\\{", "").replace("}", ""));
-        if (evaluatedValue == null) {
-          throw new Exception(rawArgumentOrMethod + " was not found as variable.");
-        }
-        String evaluatedPartial = convertValueToArgument(evaluatedValue, rawArgumentOrMethod);
+        logger.debug("Partial is quoted string");
+        String rawArgumentPayload = StringHelper.getPayloadFromQuotedString(rawArgumentOrMethod);
+        String readyArgument =
+            convertVariableToArgument(rawArgumentPayload, variables, httpBodyRawString, true);
+        // add the initial quotes
+        String evaluatedPartial = String.format(singleArgumentTemplate, readyArgument);
         logger.debug("Partial evaluated: " + evaluatedPartial);
         finalAssertLine += evaluatedPartial;
       } else {
-        throw new Exception(String.format(
-            "value [%s] or class [%s] is not supported."
-                + " Is not a method, integer, double, quoted string, boolean nor jsonpath exp",
-            rawArgumentOrMethod, rawArgumentOrMethod.getClass()));
+        logger.debug("Partial is not a method, nor a quoted string. Is just a value");
+        String readyArgument =
+            convertVariableToArgument(rawArgumentOrMethod, variables, httpBodyRawString, false);
+        String evaluatedPartial = String.format(singleArgumentTemplate, readyArgument);
+        logger.debug("Partial evaluated: " + evaluatedPartial);
+        finalAssertLine += evaluatedPartial;
       }
     }
 
@@ -77,8 +61,11 @@ public class MethodEnhancer {
   }
 
   public String rawStringToOneMethodWithSeveralArguments(String rawMethodArgumentLine,
-      HashMap<String, Object> variables, String rawString) throws Exception {
+      HashMap<String, Object> variables, String httpBodyRawString) throws Exception {
 
+    logger.debug("convert raw string into one method with several variables");
+    logger.debug("Line to evaluate: " + rawMethodArgumentLine);
+    // TODO: ensure not spaces in the first argument or variable name
     String[] rawMethodArgumentLinePartials = rawMethodArgumentLine.split("\\s+");
     String args = "";
     String methodName = null;
@@ -87,42 +74,22 @@ public class MethodEnhancer {
       String rawArgumentOrMethod = rawMethodArgumentLinePartials[a].trim();
       logger.debug("Partial to evaluate: " + rawArgumentOrMethod);
       if (a == 0 && isMethod(rawArgumentOrMethod)) {
-        methodName = MethodProperties.getProperty(rawArgumentOrMethod).trim();
+        methodName = MethodEnhancers.getProperty(rawArgumentOrMethod).trim();
         logger.debug("Partial is method");
         logger.debug("Partial evaluated: " + methodName);
-      } else if (DataTypeHelper.isInteger(rawArgumentOrMethod)
-          || DataTypeHelper.isDouble(rawArgumentOrMethod)
-          || DataTypeHelper.isQuotedString(rawArgumentOrMethod)
-          || DataTypeHelper.isBoolean(rawArgumentOrMethod)) {
-        args += rawArgumentOrMethod;
-        logger.debug("Partial is integer, double, quoted string, boolean");
-        logger.debug("Partial evaluated: " + rawArgumentOrMethod);
-      } else if (rawArgumentOrMethod.startsWith("$.")) {
-        logger.debug("Partial is jsonpath expression");
-        // placeholder is a json expression
-        Object jsonPathEvaluatedValue =
-            StringHelper.evaluateJsonExpression(rawArgumentOrMethod, rawString);
-        logger.debug(String.format("Partial jsonpath output %s which is %s", jsonPathEvaluatedValue,
-            jsonPathEvaluatedValue.getClass()));
+      } else if (DataTypeHelper.isQuotedString(rawArgumentOrMethod)) {
+        logger.debug("Partial is quoted string");
+        String rawArgumentPayload = StringHelper.getPayloadFromQuotedString(rawArgumentOrMethod);
         String evaluatedPartial =
-            convertValueToStringRepresentation(jsonPathEvaluatedValue, rawArgumentOrMethod);
-        args += evaluatedPartial;
+            convertVariableToArgument(rawArgumentPayload, variables, httpBodyRawString, true);
         logger.debug("Partial evaluated: " + evaluatedPartial);
-      } else if (rawArgumentOrMethod.startsWith("${") && rawArgumentOrMethod.endsWith("}")) {
-        logger.debug("Partial is a variable expression");
-        // placeholder is a variable
-        Object evaluatedValue =
-            variables.get(rawArgumentOrMethod.replaceFirst("\\$\\{", "").replace("}", ""));
-        if (evaluatedValue == null) {
-          throw new Exception(rawArgumentOrMethod + " was not found as variable.");
-        }
-        String evaluatedPartial =
-            convertValueToStringRepresentation(evaluatedValue, rawArgumentOrMethod);
         args += evaluatedPartial;
-        logger.debug("Partial evaluated: " + evaluatedPartial);
       } else {
-        throw new Exception(String.format("value [%s] or class [%s] is not supported",
-            rawArgumentOrMethod, rawArgumentOrMethod.getClass()));
+        logger.debug("Partial is not a method, nor a quoted string. Is just a value");
+        String evaluatedPartial =
+            convertVariableToArgument(rawArgumentOrMethod, variables, httpBodyRawString, false);
+        logger.debug("Partial evaluated: " + evaluatedPartial);
+        args += evaluatedPartial;
       }
 
       if (a > 0 && a < rawMethodArgumentLinePartials.length - 1) {
@@ -130,61 +97,106 @@ public class MethodEnhancer {
       }
     }
 
-    return String.format(methodTemplate, methodName, args);
+    String enhancedLine = String.format(methodTemplate, methodName, args);
+    logger.debug("Final enhanced line: " + enhancedLine);
+    return enhancedLine;
   }
 
-
-  private String convertValueToArgument(Object value, Object rawvalue) throws Exception {
-
-    String singleArgumentTemplate = "(%s)";
-    String singleArgumentDoubleTemplate = "(#double)";
-    String singleArgument = "";
-
-    if (value instanceof String) {
-      logger.debug(String.format("%s is string", rawvalue));
-      String stringQuotedValue = String.format("\"%s\"", value);
-      singleArgument = String.format(singleArgumentTemplate, stringQuotedValue);
-    } else if (DataTypeHelper.isInteger(value)) {
-      logger.debug(String.format("%s is integer", rawvalue));
-      singleArgument = String.format(singleArgumentTemplate, ((Integer) value).intValue());
+  private String convertValueToStringRepresentationSafe(Object value) throws Exception {
+    logger.debug(String.format("transform %s to string safe representation", value));
+    if (DataTypeHelper.isInteger(value)) {
+      return "" + DataTypeHelper.getInt(value);
+    } else if (DataTypeHelper.isLong(value)) {
+      return "" + DataTypeHelper.getLong(value);
     } else if (DataTypeHelper.isDouble(value)) {
-      logger.debug(String.format("%s is double", rawvalue));
-      singleArgument =
-          singleArgumentDoubleTemplate.replace("#double", "" + ((Double) value).doubleValue());
+      return "" + DataTypeHelper.getDouble(value);
     } else if (DataTypeHelper.isBoolean(value)) {
-      logger.debug(String.format("%s is boolean", rawvalue));
-      singleArgument = String.format(singleArgumentTemplate, ((Boolean) value).booleanValue());
-    } else {
-      throw new Exception(String.format("value %s or class %s is not supported", rawvalue,
-          rawvalue.getClass()));
-    }
+      return "" + DataTypeHelper.getBoolean(value);
+    } else if (DataTypeHelper.isString(value)) {
 
-    return singleArgument;
-  }
-
-  private String convertValueToStringRepresentation(Object value, Object rawValue)
-      throws Exception {
-    logger.debug(String.format("convert %s to string representation", value));
-    if (DataTypeHelper.isString(value)) {
       return String.format("\"%s\"", value);
-    } else if (DataTypeHelper.isInteger(value)) {
-      return "" + ((Integer) value).intValue();
-    } else if (DataTypeHelper.isDouble(value)) {
-      return "" + ((Double) value).doubleValue();
-    } else if (DataTypeHelper.isBoolean(value)) {
-      return "" + ((Boolean) value).booleanValue();
     } else {
-      throw new Exception(String.format("value %s or its class %s is not supported", rawValue,
-          rawValue.getClass()));
+      throw new Exception(
+          String.format("value %s or its class %s is not supported", value, value.getClass()));
+    }
+  }
+
+  private String convertValueToSimpleStringRepresentation(Object value) throws Exception {
+    logger.debug(String.format("transform %s to string representation", value));
+    if (DataTypeHelper.isString(value)) {
+      return (String) value;
+    } else if (DataTypeHelper.isInteger(value)) {
+      return "" + DataTypeHelper.getInt(value);
+    } else if (DataTypeHelper.isLong(value)) {
+      return "" + DataTypeHelper.getLong(value);
+    } else if (DataTypeHelper.isDouble(value)) {
+      return "" + DataTypeHelper.getDouble(value);
+    } else if (DataTypeHelper.isBoolean(value)) {
+      return "" + DataTypeHelper.getBoolean(value);
+    } else {
+      throw new Exception(
+          String.format("value %s or its class %s is not supported", value, value.getClass()));
     }
   }
 
   private boolean isMethod(String raw) throws Exception {
     try {
-      return MethodProperties.getProperty(raw) != null;
+      return MethodEnhancers.getProperty(raw) != null;
     } catch (Exception e) {
       return false;
     }
+  }
+
+  private String convertVariableToArgument(String rawArgumentPayload,
+      HashMap<String, Object> variables, String httpBodyRawString, boolean cameFromQuotedString)
+      throws Exception {
+
+    String evaluatedPartial = null;
+
+    if (rawArgumentPayload.startsWith("$.")) {
+      // placeholder is a json expression
+      Object jsonPathEvaluatedValue =
+          StringHelper.evaluateJsonExpression(rawArgumentPayload, httpBodyRawString);
+      logger.debug(String.format("Partial is jsonpath exp: %s, output %s which is %s",
+          rawArgumentPayload, jsonPathEvaluatedValue, jsonPathEvaluatedValue.getClass()));
+
+      if (cameFromQuotedString) {
+        evaluatedPartial = "\"" + jsonPathEvaluatedValue + "\"";
+      } else {
+        // value here is genuine from jsonpath result
+        evaluatedPartial =
+            StringHelper.convertGeniuneValueToStringRepresentationSafe(jsonPathEvaluatedValue);
+      }
+
+    } else if (rawArgumentPayload.startsWith("${") && rawArgumentPayload.endsWith("}")) {
+      logger.debug("Partial is variable");
+      // placeholder is a variable
+      // all values readed from varialbes.properties are string
+      // TODO: Review when is used a quotes string with prop var
+      Object evaluatedValue =
+          variables.get(rawArgumentPayload.replaceFirst("\\$\\{", "").replace("}", ""));
+      if (evaluatedValue == null) {
+        throw new Exception(rawArgumentPayload + " was not found as variable.");
+      }
+
+      if (cameFromQuotedString) {
+        evaluatedPartial = "\"" + evaluatedValue + "\"";
+      } else {
+        // evaluatedPartial = (String)evaluatedValue;
+        evaluatedPartial = convertValueToSimpleStringRepresentation(evaluatedValue);
+      }
+
+    } else {
+      logger.debug("Partial is not jsonpath nor placeholder variable. Is just a value");
+      logger.debug("Partial came from quotes string: " + cameFromQuotedString);
+      if (cameFromQuotedString) {
+        evaluatedPartial = "\"" + rawArgumentPayload + "\"";
+      } else {
+        evaluatedPartial = convertValueToStringRepresentationSafe(rawArgumentPayload);
+      }
+    }
+
+    return evaluatedPartial;
   }
 
 }

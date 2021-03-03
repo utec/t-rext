@@ -52,7 +52,7 @@ public class FeatureExecutor {
 
     // get scenarios
     ArrayList<Scenario> scenarios = feature.getScenarios();
-    logger.info("T-Rext has detect a valid feature.");
+    logger.info("T-Rext has detect a valid feature: "+singleFeature.getAbsolutePath());
     logger.info("Launching " + scenarios.size() + " scenarios");
     ArrayList<HashMap<String, Object>> scenariosStats = new ArrayList<HashMap<String, Object>>();
     int passedCount = 0;
@@ -68,10 +68,12 @@ public class FeatureExecutor {
 
       if (scenario.isDisabled()) {
         logger.info(String.format("scenario [%s] is disabled", scenario.getName()));
+        passedCount++;
         continue;
       }
 
       logger.info(String.format("scenario [%s] is starting", scenario.getName()));
+      logger.debug(scenario.toString());
       Boolean hasHttpError = null;
       Boolean hasAssertError = null;
       Boolean hasContextError = null;
