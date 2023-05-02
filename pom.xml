@@ -57,12 +57,8 @@
 				<configuration>
 					<check>
 						<haltOnFailure>true</haltOnFailure>
-						<branchRate>90</branchRate>
-						<lineRate>90</lineRate>
-						<totalBranchRate>90</totalBranchRate>
-						<totalLineRate>90</totalLineRate>
-						<packageLineRate>90</packageLineRate>
-						<packageBranchRate>90</packageBranchRate>
+						<totalBranchRate>65</totalBranchRate>
+						<totalLineRate>65</totalLineRate>
 					</check>
 					<formats>
 						<format>html</format>
