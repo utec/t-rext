@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.utec.tools.trext</groupId>
 	<artifactId>t-rext</artifactId>
-	<version>1.0.2-pre-alpha</version>
+	<version>1.0.3</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

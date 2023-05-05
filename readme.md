@@ -5,49 +5,60 @@
 T-Rext is a java framework which allows you to automate rest APIs with a rich set of fluent assertions. Its natural assertions and truly helpful error messages improves test code readability and is designed to be super easy for even non-programmers.
 
 
-# Requirements
+## Requirements
 
-- Java 8
-- A healthy rest endpoint. 
-    - https://api.agify.io/?name=Richard
-    - response `{"name":"richard","age":58,"count":95810}`
+- Java >= 8
+- A healthy rest endpoint like `https://api.agify.io/?name=Richard`
 - A scenario like: 
-    - If name is **Richard**, the age must be **58**      
+    - **Richard** age must be greater than **0**      
 
-# Install
+## Installer (Linux)
 
-- Download the latest version from [here](https://github.com/utec/t-rext/releases/tag/v1.0.0-pre-alpha)
+To install or update, you should run the install script. To do that, you may either download and run the script manually, or use the following cURL or Wget command:
 
-# Steps
+```
+curl -o- https://github.com/jrichardsz-software-architect-tools/t-rext/releases/latest/download/t-rext.sh | bash
+```
+
+```
+wget -qO- https://github.com/jrichardsz-software-architect-tools/t-rext/releases/latest/download/t-rext.sh | bash
+```
+
+> Note: For windows users read [this](https://github.com/jrichardsz-software-architect-tools/t-rext/wiki/Installer#for-windows-developerstesters)
+
+## Steps
 
 - Create some folder like: `/tmp/hello_world`
-- Create a feature inside the recently created folder like: `name_predictor.feature`
+- Create a feature inside the recently created folder like: `name_validator.feature`
 - Copy and paste the following feature
 
 ```
 Feature:   Age validation
 Ensure that api returns the correct users age
 
-Scenario: Richard's age must be 58
+Scenario: Richard's age must greater than 0
 url https://api.agify.io/?name=Richard
 method get
 asserts
-assertThat $.age isEqualTo 58
+assertThat $.age isGreaterThan 0
 ```
 
 - Execute:
 
 ```
-java -jar t-rext.jar -mode auto -directory /tmp/hello_world
+t-rext -mode auto -directory /tmp/hello_world
 ```
 
+Or [this](https://github.com/jrichardsz-software-architect-tools/t-rext/wiki/Execute#for-windows-developers) for windows users
 
 
 - That's all! You must see an html report in the main folder:
 
 ![https://i.ibb.co/4RGbgjx/success-report.png](https://i.ibb.co/4RGbgjx/success-report.png)
 
-# Features
+More demos [here](https://github.com/jrichardsz-software-architect-tools/t-rext-demo)
+
+## Features
 
 - One feature file could contain several scenarios
 - One scenario could use previously saved variables
@@ -99,13 +110,16 @@ java -jar t-rext.jar -mode auto -directory /tmp/hello_world
 
 # Advanced settings
 
-More details in [wiki](https://github.com/utec/t-rext/wiki)
+More details in [wiki](https://github.com/jrichardsz-software-architect-tools/t-rext/wiki)
 
 # TO DO
 
 - Apply cobertura maven plugin
+- Set coverage minimum threshold of 90
+- Add code coverage badges 
 - composed variables like ${book_id}-latest in asserts y context
-- Add more asserts from: [assertj](https://joel-costigliola.github.io/assertj/core-8/api/org/assertj/core/api/AbstractComparableAssert.html) 
+- Add more asserts from: [assertj](https://joel-costigliola.github.io/assertj/core-8/api/org/assertj/core/api/AbstractComparableAssert.html)
+- improve the linux script (installer) like nvm
 
 # Acknowledgments
 
@@ -113,6 +127,15 @@ More details in [wiki](https://github.com/utec/t-rext/wiki)
 - https://assertj.github.io/doc/
 
 
-# Note:
+## Contributors
 
-- At this moment coverage does not pass the 90 threshold, so jar can not be created. Jar is created removing coverage thresholds
+<table>
+  <tbody>
+    <td>
+      <img src="https://avatars0.githubusercontent.com/u/3322836?s=460&v=4" width="100px;"/>
+      <br />
+      <label><a href="http://jrichardsz.github.io/">JRichardsz</a></label>
+      <br />
+    </td>    
+  </tbody>
+</table>
